@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LinguaAI — Grammar Mastery</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Nunito:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#faf8f3;--bg2:#f2ede0;--bg3:#ebe4d1;
+  --text:#1c1a16;--text2:#5a5040;--text3:#9a8e78;
+  --border:#dfd7c2;--shadow:rgba(28,26,22,.07);--shadow-lg:rgba(28,26,22,.16);
+  --r:16px;--rs:10px;--t:.26s cubic-bezier(.4,0,.2,1);
+  --accent:#059669;--acbg:#ecfdf5;--acbo:#a7f3d0;
+  --nl-c:#e8590c;--nl-bg:#fff3ed;--nl-bo:#fcd0b5;
+  --fr-c:#4f46e5;--fr-bg:#eef2ff;--fr-bo:#c7d2fe;
+  --en-c:#059669;--en-bg:#ecfdf5;--en-bo:#a7f3d0;
+}
+[data-theme="dark"]{
+  --bg:#0e0d09;--bg2:#18160f;--bg3:#221f16;
+  --text:#f0ead8;--text2:#b8a88a;--text3:#6a5f45;
+  --border:#2e2820;--shadow:rgba(0,0,0,.4);--shadow-lg:rgba(0,0,0,.6);
+  --acbg:#0d2218;--acbo:#166534;
+  --nl-bg:#280e06;--nl-bo:#9a3412;
+  --fr-bg:#12103a;--fr-bo:#3730a3;
+  --en-bg:#0d2218;--en-bo:#166534;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);line-height:1.65;transition:background var(--t),color var(--t);min-height:100vh}
+
+/* ── LANG SELECT ── */
+#langSelect{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;position:relative;overflow:hidden}
+#langSelect::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 22% 28%,rgba(232,89,12,.08) 0%,transparent 50%),radial-gradient(ellipse at 78% 72%,rgba(79,70,229,.08) 0%,transparent 50%),radial-gradient(ellipse at 50% 50%,rgba(5,150,105,.06) 0%,transparent 55%)}
+[data-theme="dark"] #langSelect::before{background:radial-gradient(ellipse at 22% 28%,rgba(232,89,12,.14) 0%,transparent 50%),radial-gradient(ellipse at 78% 72%,rgba(79,70,229,.14) 0%,transparent 50%),radial-gradient(ellipse at 50% 50%,rgba(5,150,105,.1) 0%,transparent 55%)}
+.ls-hero{text-align:center;margin-bottom:2.8rem;animation:fadeUp .55s ease both}
+.ls-hero h1{font-family:'Libre Baskerville',serif;font-size:clamp(2.4rem,5vw,4rem);font-weight:700;letter-spacing:-.03em;line-height:1.1}
+.ls-hero h1 em{font-style:normal;color:var(--accent)}
+.ls-hero p{color:var(--text2);font-size:1.05rem;margin-top:.6rem;font-weight:500}
+.ls-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.2rem;max-width:840px;width:100%}
+.lc{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);padding:2.4rem 1.8rem;text-align:center;cursor:pointer;transition:all var(--t);position:relative;overflow:hidden;animation:fadeUp .55s ease both}
+.lc:nth-child(1){animation-delay:.1s}.lc:nth-child(2){animation-delay:.2s}.lc:nth-child(3){animation-delay:.3s}
+.lc::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;transform:scaleX(0);transition:transform var(--t);transform-origin:left}
+.lc.nl::after{background:var(--nl-c)}.lc.fr::after{background:var(--fr-c)}.lc.en::after{background:var(--en-c)}
+.lc:hover{transform:translateY(-8px);box-shadow:0 22px 46px var(--shadow-lg)}
+.lc:hover::after{transform:scaleX(1)}
+.lc.nl:hover{border-color:var(--nl-c)}.lc.fr:hover{border-color:var(--fr-c)}.lc.en:hover{border-color:var(--en-c)}
+.lc-flag{font-size:3.8rem;display:block;margin-bottom:.9rem;animation:float 4s ease-in-out infinite}
+.lc:nth-child(2) .lc-flag{animation-delay:1.3s}.lc:nth-child(3) .lc-flag{animation-delay:2.6s}
+.lc-name{font-family:'Libre Baskerville',serif;font-size:1.85rem;font-weight:700;margin-bottom:.2rem}
+.lc-sub{color:var(--text3);font-size:.88rem;font-weight:600;letter-spacing:.03em;text-transform:uppercase}
+
+/* ── APP ── */
+#app{display:none}
+.app-header{background:var(--bg);border-bottom:1.5px solid var(--border);position:sticky;top:0;z-index:200;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.hdr{max-width:1340px;margin:0 auto;padding:.8rem 1.75rem;display:flex;align-items:center;gap:1rem}
+.logo{font-family:'Libre Baskerville',serif;font-size:1.45rem;font-weight:700;flex:1;cursor:pointer;display:flex;align-items:center;gap:.35rem;color:var(--text);text-decoration:none;user-select:none}
+.logo-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0;transition:background var(--t)}
+.hdr-acts{display:flex;gap:.4rem}
+.ico-btn{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--rs);padding:.48rem .85rem;cursor:pointer;transition:all var(--t);font-size:.88rem;font-family:'Nunito',sans-serif;font-weight:700;color:var(--text);display:flex;align-items:center;gap:.3rem;white-space:nowrap}
+.ico-btn:hover{background:var(--bg3);border-color:var(--text3)}
+.nav-bar{background:var(--bg);border-bottom:1.5px solid var(--border)}
+.nav-inner{max-width:1340px;margin:0 auto;padding:0 1.75rem;display:flex}
+.ntab{padding:.8rem 1.4rem;background:none;border:none;border-bottom:2.5px solid transparent;color:var(--text3);font-size:.92rem;font-weight:700;cursor:pointer;transition:all var(--t);font-family:'Nunito',sans-serif;letter-spacing:.01em;white-space:nowrap}
+.ntab:hover{color:var(--text)}.ntab.active{color:var(--text);border-bottom-color:var(--accent)}
+.cwrap{max-width:1340px;margin:0 auto;padding:1.75rem}
+
+/* ── SEARCH ── */
+.sh{margin-bottom:1.25rem;position:relative}
+.si{width:100%;padding:.85rem 3rem .85rem 1.1rem;font-size:.96rem;border:1.5px solid var(--border);border-radius:var(--rs);background:var(--bg2);color:var(--text);font-family:'Nunito',sans-serif;transition:all var(--t)}
+.si::placeholder{color:var(--text3)}
+.si:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(5,150,105,.12);background:var(--bg)}
+.si-ico{position:absolute;right:.9rem;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none;font-size:1.1rem}
+
+/* ── TOPIC GRID ── */
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:.85rem}
+.tc{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);padding:1.4rem;cursor:pointer;transition:all var(--t);position:relative;overflow:hidden;animation:fadeIn .4s ease both}
+.tc::before{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--accent);transform:scaleX(0);transition:transform var(--t);transform-origin:left}
+.tc:hover{transform:translateY(-3px);box-shadow:0 8px 24px var(--shadow);border-color:var(--acbo)}.tc:hover::before{transform:scaleX(1)}
+.tc-num{display:inline-flex;align-items:center;justify-content:center;width:1.85rem;height:1.85rem;background:var(--acbg);color:var(--accent);border-radius:7px;font-size:.7rem;font-weight:900;margin-bottom:.65rem;border:1px solid var(--acbo)}
+.tc-title{font-family:'Libre Baskerville',serif;font-size:.98rem;font-weight:700;margin-bottom:.28rem;line-height:1.3;color:var(--text)}
+.tc-desc{color:var(--text2);font-size:.81rem;line-height:1.5}
+
+/* ── BACK BTN ── */
+.back-btn{display:inline-flex;align-items:center;gap:.4rem;background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--rs);padding:.5rem .95rem;cursor:pointer;transition:all var(--t);font-weight:700;color:var(--text);font-family:'Nunito',sans-serif;font-size:.88rem;margin-bottom:1.2rem}
+.back-btn:hover{transform:translateX(-3px);border-color:var(--text3)}
+
+/* ── DETAIL HEADER ── */
+.det-hdr{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);padding:1.75rem 2.2rem;margin-bottom:1.2rem}
+.det-hdr h1{font-family:'Libre Baskerville',serif;font-size:clamp(1.35rem,3vw,2rem);font-weight:700;margin-bottom:.35rem}
+.det-desc{color:var(--text2);margin-bottom:1.2rem;font-size:.95rem}
+.tact{display:flex;gap:.6rem;flex-wrap:wrap}
+.btn{padding:.65rem 1.3rem;border-radius:var(--rs);font-family:'Nunito',sans-serif;font-weight:700;font-size:.88rem;cursor:pointer;transition:all var(--t);border:1.5px solid transparent;letter-spacing:.01em}
+.btn-p{background:var(--accent);color:#fff;border-color:var(--accent)}.btn-p:hover{opacity:.88;transform:translateY(-1px);box-shadow:0 4px 12px rgba(5,150,105,.3)}
+.btn-s{background:var(--bg);color:var(--text);border-color:var(--border)}.btn-s:hover{background:var(--bg3);border-color:var(--text3)}
+.btn-o{background:var(--bg2);color:var(--text);border-color:var(--border)}.btn-o:hover{background:var(--bg3)}
+
+/* ── GRAMMAR CONTENT ── */
+.cbox{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);padding:2rem 2.4rem;line-height:1.85;animation:fadeIn .4s ease both}
+.cbox h2{font-family:'Libre Baskerville',serif;font-size:1.35rem;margin-bottom:.85rem;color:var(--text)}
+.cbox h3{font-family:'Libre Baskerville',serif;font-size:1.1rem;margin:1.3rem 0 .65rem;color:var(--text)}
+.cbox p{margin-bottom:.85rem;color:var(--text)}
+.cbox ul,.cbox ol{margin:.35rem 0 .9rem 1.25rem}
+.cbox li{margin-bottom:.35rem;color:var(--text)}
+.cbox strong{font-weight:800;color:var(--text)}
+.cbox em{color:var(--accent);font-style:italic}
+.cbox table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.9rem;border-radius:var(--rs);overflow:hidden}
+.cbox th{background:var(--bg3);color:var(--text);font-weight:800;padding:.6rem .9rem;text-align:left;border:1px solid var(--border)}
+.cbox td{padding:.52rem .9rem;border:1px solid var(--border);color:var(--text);vertical-align:top}
+.cbox tr:nth-child(even) td{background:var(--bg3)}
+.ex-box{background:var(--bg3);border-left:3px solid var(--accent);padding:.85rem 1.1rem;border-radius:0 var(--rs) var(--rs) 0;margin:.85rem 0}
+.ex-box .orig{display:block;font-family:'Libre Baskerville',serif;font-style:italic;color:var(--text);margin-bottom:.18rem;font-size:1rem}
+.ex-box .trl{display:block;color:var(--text3);font-size:.85rem}
+.tip-box{background:var(--acbg);border:1px solid var(--acbo);border-radius:var(--rs);padding:.85rem 1.1rem;margin:.85rem 0;font-size:.9rem;color:var(--text)}
+.tip-box::before{content:'💡  '}
+
+/* ── LOADING / ERROR ── */
+.ldwrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4rem 2rem;gap:.85rem;color:var(--text3);font-weight:600;font-size:.91rem}
+.spin{width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
+.err-box{background:var(--bg2);border:2px solid #ef4444;border-radius:var(--r);padding:2rem;text-align:center;color:var(--text)}
+.err-box h3{margin-bottom:.5rem;font-family:'Libre Baskerville',serif;font-size:1.2rem}
+.err-box p{color:var(--text2);margin-bottom:1.2rem;font-size:.92rem;line-height:1.6}
+
+/* ── QUIZ ── */
+.qhdr{margin-bottom:1.15rem}
+.pbar-wrap{background:var(--bg3);border-radius:100px;height:5px;margin-bottom:.4rem;overflow:hidden}
+.pbar-fill{height:100%;background:var(--accent);border-radius:100px;transition:width .5s ease}
+.qmeta{display:flex;justify-content:space-between;color:var(--text3);font-size:.8rem;font-weight:700}
+.qcard{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);padding:1.75rem 2.2rem;margin-bottom:.9rem;animation:fadeIn .3s ease both}
+.qtext{font-size:1.06rem;font-weight:700;margin-bottom:1.35rem;line-height:1.55;color:var(--text)}
+.opts{display:flex;flex-direction:column;gap:.55rem}
+.obtn{padding:.88rem 1.1rem;border:1.5px solid var(--border);border-radius:var(--rs);background:var(--bg);color:var(--text);text-align:left;cursor:pointer;transition:all var(--t);font-size:.92rem;font-family:'Nunito',sans-serif;font-weight:600;display:flex;align-items:flex-start;gap:.7rem;line-height:1.45}
+.obtn:hover:not(:disabled){border-color:var(--accent);background:var(--acbg);transform:translateX(4px)}
+.obtn:disabled{cursor:default;transform:none}
+.oltr{min-width:1.55rem;height:1.55rem;border-radius:6px;background:var(--bg2);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;flex-shrink:0;transition:all var(--t);margin-top:.08rem}
+.obtn.correct{background:#ecfdf5;border-color:#059669;color:#064e3b}
+.obtn.correct .oltr{background:#059669;border-color:#059669;color:#fff}
+[data-theme="dark"] .obtn.correct{background:#0d2218;border-color:#15803d;color:#6ee7b7}
+.obtn.incorrect{background:#fef2f2;border-color:#ef4444;color:#7f1d1d}
+.obtn.incorrect .oltr{background:#ef4444;border-color:#ef4444;color:#fff}
+[data-theme="dark"] .obtn.incorrect{background:#1f0a0a;border-color:#dc2626;color:#fca5a5}
+.obtn.sel-test{background:var(--acbg);border-color:var(--accent)}
+.obtn.sel-test .oltr{background:var(--accent);border-color:var(--accent);color:#fff}
+.expbox{background:var(--acbg);border:1.5px solid var(--acbo);border-radius:var(--rs);padding:.82rem 1.1rem;margin-top:.85rem;font-size:.88rem;color:var(--text);animation:fadeIn .3s ease both;font-weight:600;line-height:1.55}
+.qnav{display:flex;justify-content:space-between;align-items:center;margin-top:.9rem;gap:.6rem}
+
+/* ── RESULTS ── */
+.res-card{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);padding:2.5rem;text-align:center;animation:fadeIn .5s ease both}
+.res-score{font-family:'Libre Baskerville',serif;font-size:clamp(3.2rem,9vw,5.8rem);font-weight:700;color:var(--accent);line-height:1;margin:.7rem 0}
+.res-lbl{color:var(--text3);font-size:.85rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.res-msg{font-size:1.15rem;font-weight:800;margin-bottom:1.5rem;color:var(--text)}
+.res-acts{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.75rem}
+.rev-sect{margin-top:1.5rem}
+.rev-sect h3{font-family:'Libre Baskerville',serif;margin-bottom:.85rem;font-size:1rem;color:var(--text2)}
+.rev-item{background:var(--bg2);border:1.5px solid var(--border);border-left-width:3px;border-radius:var(--rs);padding:.82rem 1.1rem;margin-bottom:.55rem;font-size:.87rem}
+.rev-q{font-weight:700;margin-bottom:.3rem;color:var(--text)}
+.rev-a{font-weight:800;margin-bottom:.2rem}
+.rev-e{color:var(--text3);font-size:.81rem;margin-top:.15rem}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .cwrap{padding:1rem}.hdr{padding:.7rem 1rem}
+  .nav-inner{padding:0 .75rem;overflow-x:auto;scrollbar-width:none}
+  .nav-inner::-webkit-scrollbar{display:none}
+  .ntab{padding:.7rem 1rem;font-size:.83rem}
+  .det-hdr,.cbox,.qcard{padding:1.35rem 1.4rem}
+  .tgrid{grid-template-columns:1fr}.ls-grid{max-width:300px}
+  .res-card{padding:1.75rem 1.4rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ LANGUAGE SELECT ══ -->
+<div id="langSelect">
+  <div class="ls-hero">
+    <h1>Lingua<em>AI</em></h1>
+    <p>AI-Powered Grammar Mastery</p>
+  </div>
+  <div class="ls-grid">
+    <div class="lc nl" onclick="selectLang('nl')">
+      <span class="lc-flag">🇳🇱</span>
+      <div class="lc-name">Nederlands</div>
+      <div class="lc-sub">Dutch Language</div>
+    </div>
+    <div class="lc fr" onclick="selectLang('fr')">
+      <span class="lc-flag">🇫🇷</span>
+      <div class="lc-name">Français</div>
+      <div class="lc-sub">French Language</div>
+    </div>
+    <div class="lc en" onclick="selectLang('en')">
+      <span class="lc-flag">🇬🇧</span>
+      <div class="lc-name">English</div>
+      <div class="lc-sub">British English</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MAIN APP ══ -->
+<div id="app">
+  <header class="app-header">
+    <div class="hdr">
+      <div class="logo" onclick="goHome()">LinguaAI<span class="logo-dot"></span></div>
+      <div class="hdr-acts">
+        <button class="ico-btn" onclick="goHome()"><span id="langFlag">🇬🇧</span> <span id="langName">EN</span></button>
+        <button class="ico-btn" onclick="toggleTheme()"><span id="themeIco">🌙</span></button>
+      </div>
+    </div>
+  </header>
+  <nav class="nav-bar">
+    <div class="nav-inner">
+      <button class="ntab active" id="tab-grammar"  onclick="switchTab('grammar')"><span id="lbl-grammar">Grammar</span></button>
+      <button class="ntab"        id="tab-practice" onclick="switchTab('practice')"><span id="lbl-practice">Practice</span></button>
+      <button class="ntab"        id="tab-test"     onclick="switchTab('test')"><span id="lbl-test">Test</span></button>
+    </div>
+  </nav>
+  <div class="cwrap">
+    <div id="sec-grammar">
+      <div class="sh">
+        <input class="si" type="text" id="searchInp" oninput="filterTopics()" placeholder="Search..."/>
+        <span class="si-ico">🔍</span>
+      </div>
+      <div class="tgrid" id="grammarGrid"></div>
+    </div>
+    <div id="sec-practice" style="display:none"><div class="tgrid" id="practiceGrid"></div></div>
+    <div id="sec-test"     style="display:none"><div class="tgrid" id="testGrid"></div></div>
+    <div id="sec-detail"   style="display:none">
+      <button class="back-btn" onclick="backFromDetail()">← <span id="backLbl">Back</span></button>
+      <div id="detailPane"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+// ═══════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════
+const API_URL = 'https://linguaai-proxy.roj-tahsin.workers.dev';const LTRS    = ['A','B','C','D'];
+
+// ═══════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════
+const S = {
+  lang:'en', tab:'grammar', mode:'grammar',
+  topicId:null, dark:false,
+  Qs:[], qi:0, ans:[],
+  cache:{}
+};
+
+// ═══════════════════════════════════════════════
+//  TOPICS (40 per language)
+// ═══════════════════════════════════════════════
+const TOPICS = {
+nl:[
+  {id:1,  t:"De lidwoorden (de/het/een)",            d:"Leer wanneer je 'de', 'het' of 'een' moet gebruiken"},
+  {id:2,  t:"Bezittelijke voornaamwoorden",           d:"Mijn, jouw, zijn, haar, ons, jullie, hun"},
+  {id:3,  t:"Tegenwoordige tijd",                    d:"Regelmatige en onregelmatige werkwoorden"},
+  {id:4,  t:"Verleden tijd – zwak en sterk",         d:"'t kofschip-regel, klankverandering sterke ww."},
+  {id:5,  t:"Voltooide tijden",                      d:"Voltooid tegenwoordige tijd en voltooid verleden tijd"},
+  {id:6,  t:"Toekomende tijd",                       d:"Zullen, gaan en tegenwoordige tijd voor toekomst"},
+  {id:7,  t:"Modale werkwoorden",                    d:"Kunnen, moeten, mogen, willen, zullen, hoeven"},
+  {id:8,  t:"Scheidbare werkwoorden",                d:"Werkwoorden die in hoofdzin splitsen"},
+  {id:9,  t:"Wederkerende werkwoorden",              d:"Zich wassen, zich vergissen, zich herinneren"},
+  {id:10, t:"Meervoud van zelfstandige naamwoorden", d:"Regels voor -en, -s, -eren en onregelmatige meervouden"},
+  {id:11, t:"Verkleinwoorden (diminutieven)",        d:"-je, -tje, -etje, -pje, -kje: keuze en spelling"},
+  {id:12, t:"Bijvoeglijke naamwoorden – verbuiging", d:"Met of zonder -e: bepaald/onbepaald, de/het-woord"},
+  {id:13, t:"Trappen van vergelijking",              d:"Vergrotende (-er) en overtreffende (-st) trap"},
+  {id:14, t:"Voorzetsels",                           d:"In, op, aan, bij, naar, van en vaste combinaties"},
+  {id:15, t:"Vragende voornaamwoorden",              d:"Wie, wat, welk(e), waar, wanneer, waarom, hoe"},
+  {id:16, t:"Aanwijzende voornaamwoorden",           d:"Deze, die, dit, dat – verschil en gebruik"},
+  {id:17, t:"Onbepaalde voornaamwoorden",            d:"Iemand, niemand, iets, niets, alle, elk, men"},
+  {id:18, t:"Ontkenningen",                          d:"Niet vs. geen: keuze, plaatsing en andere negaties"},
+  {id:19, t:"Woordvolgorde in hoofdzinnen",          d:"V2-regel, inversie en de positie van zinsdelen"},
+  {id:20, t:"Woordvolgorde in bijzinnen",            d:"Persoonsvorm naar het einde"},
+  {id:21, t:"Nevenschikkende voegwoorden",           d:"En, maar, of, want, dus, noch"},
+  {id:22, t:"Onderschikkende voegwoorden",           d:"Omdat, dat, als, hoewel, terwijl, tenzij, zodra"},
+  {id:23, t:"Betrekkelijke bijzinnen",               d:"Die, dat, wat en waar- als betrekkelijke vnw."},
+  {id:24, t:"Passieve zinnen (lijdende vorm)",       d:"Worden en zijn + voltooid deelwoord"},
+  {id:25, t:"Conditionele zinnen en de irrealis",    d:"Als-zinnen, zou(den) en de verleden irrealis"},
+  {id:26, t:"Indirecte rede",                        d:"Tijdsverandering, voornaamwoorden en indicatoren"},
+  {id:27, t:"'Om te'- en 'te'-infinitieven",         d:"Wanneer te en om te voor de infinitief staan"},
+  {id:28, t:"Continuïteitsvormen",                   d:"Aan het, zitten te, staan te, lopen te, liggen te"},
+  {id:29, t:"Vervangende infinitief",                d:"Modale perfectum zonder ge-"},
+  {id:30, t:"Het woord 'er' (alle functies)",        d:"Plaatsaanduiding, voorlopig onderwerp, kwantitatief…"},
+  {id:31, t:"Pronominale bijwoorden",                d:"Ervan, hierop, daarvoor, waarmee, eraan"},
+  {id:32, t:"Bijwoorden",                            d:"Tijd, plaats, frequentie, wijze, graad en modaliteit"},
+  {id:33, t:"Gebiedende wijs (imperatief)",          d:"Bevelen, verzoeken, beleefde vorm en laten-constructie"},
+  {id:34, t:"Telwoorden",                            d:"Hoofdtelwoorden, rangtelwoorden, breuken en gebruik"},
+  {id:35, t:"Datum en tijd",                         d:"Klokkijken, dagen, maanden, jaren en vaste uitdrukkingen"},
+  {id:36, t:"Participia",                            d:"Tegenwoordig en verleden deelwoord als bijvoeglijk nw."},
+  {id:37, t:"Spellingregels",                        d:"Klinkerlengte, verdubbeling, f/v, s/z, apostrof"},
+  {id:38, t:"Wederkerige voornaamwoorden",           d:"Elkaar, elkander en onderscheid met wederkerende vnw."},
+  {id:39, t:"Formeel vs. informeel (u/jij)",         d:"Wanneer u vs. jij/je – tutoyeren en vousvoyeren"},
+  {id:40, t:"Veelgemaakte fouten & valkuilen",       d:"Hun/hen, dan/als, liggen/leggen, die/dat, er-fouten"}
+],
+fr:[
+  {id:1,  t:"Les articles",                          d:"Définis, indéfinis, partitifs – règles et exceptions"},
+  {id:2,  t:"Le genre et le nombre des noms",        d:"Masculin/féminin, pluriels réguliers et irréguliers"},
+  {id:3,  t:"Les adjectifs qualificatifs",           d:"Accord, place avant/après le nom, sens différents"},
+  {id:4,  t:"Les pronoms personnels sujets",         d:"Je, tu, il/elle/on, nous, vous, ils/elles"},
+  {id:5,  t:"Les pronoms compléments (COD/COI)",     d:"Le, la, les, lui, leur, y, en – ordre et place"},
+  {id:6,  t:"Les pronoms possessifs",                d:"Mon/ton/son, notre/votre/leur et formes accentuées"},
+  {id:7,  t:"Les pronoms démonstratifs",             d:"Ce/cet/cette/ces, celui/celle/ceux/celles"},
+  {id:8,  t:"Les pronoms relatifs",                  d:"Qui, que, dont, où, lequel/laquelle/lesquels"},
+  {id:9,  t:"Le présent de l'indicatif",             d:"Groupes -er/-ir/-re, verbes irréguliers fréquents"},
+  {id:10, t:"Le passé composé",                      d:"Auxiliaires avoir/être, accord du participe passé"},
+  {id:11, t:"L'imparfait",                           d:"Formation et emplois : description, habitude"},
+  {id:12, t:"Le passé simple",                       d:"Formation et usage littéraire/écrit soutenu"},
+  {id:13, t:"Le plus-que-parfait",                   d:"Antériorité dans le passé et concordance des temps"},
+  {id:14, t:"Le futur simple et futur antérieur",    d:"Radicaux réguliers et irréguliers"},
+  {id:15, t:"Le conditionnel présent et passé",      d:"Politesse, hypothèse, information non confirmée"},
+  {id:16, t:"Le subjonctif présent et passé",        d:"Emplois après volonté, sentiment, doute"},
+  {id:17, t:"L'impératif",                           d:"Formation, ordres affirmatifs/négatifs, place des pronoms"},
+  {id:18, t:"Les verbes pronominaux",                d:"Réfléchis, réciproques, accord du participe"},
+  {id:19, t:"La voix passive",                       d:"Formation avec être, complément d'agent par/de"},
+  {id:20, t:"Le discours indirect",                  d:"Concordance des temps et changements d'indicateurs"},
+  {id:21, t:"La phrase conditionnelle avec 'si'",    d:"Potentiel / irréel présent / irréel passé"},
+  {id:22, t:"Les verbes modaux",                     d:"Pouvoir, devoir, vouloir, savoir – conjugaison"},
+  {id:23, t:"La négation",                           d:"Ne…pas, plus, jamais, rien, personne, ni…ni"},
+  {id:24, t:"L'interrogation",                       d:"Intonation, est-ce que, inversion – registres"},
+  {id:25, t:"Les prépositions",                      d:"À, de, dans, en, par, pour, sur, chez"},
+  {id:26, t:"Les conjonctions",                      d:"Coordination (mais, ou, et…) et subordination"},
+  {id:27, t:"Les adverbes",                          d:"Formation en -ment, place dans la phrase, degrés"},
+  {id:28, t:"Les pronoms y et en",                   d:"Emploi, place, combinaisons et priorités"},
+  {id:29, t:"L'accord du participe passé",           d:"Avec avoir (COD avant), être, verbes pronominaux"},
+  {id:30, t:"Les temps du futur",                    d:"Futur proche, futur simple, futur antérieur"},
+  {id:31, t:"Le gérondif et participe présent",      d:"En + participe présent, adjectif verbal"},
+  {id:32, t:"Tout, même, demi, nu, ci-joint",        d:"Accords complexes et règles particulières"},
+  {id:33, t:"Prépositions et noms géographiques",    d:"À/en/au/aux/de/du/des selon genre et pays"},
+  {id:34, t:"C'est vs il est",                       d:"Présentation, identification, profession"},
+  {id:35, t:"Les nombres, la date et l'heure",       d:"Cardinaux, ordinaux, accord de vingt/cent"},
+  {id:36, t:"Infinitif après prépositions",          d:"Sans, avant de, après, pour, en train de"},
+  {id:37, t:"Les phrases relatives complexes",       d:"Dont, auquel, duquel, ce qui/ce que"},
+  {id:38, t:"L'inversion sujet-verbe",               d:"Questions formelles, inversion stylistique"},
+  {id:39, t:"Tu vs vous – registres de langue",      d:"Tutoiement, vouvoiement, contextes sociaux"},
+  {id:40, t:"Erreurs fréquentes et gallicismes",     d:"Pièges courants, confusions, nuances"}
+],
+en:[
+  {id:1,  t:"Articles: a / an / the / zero",         d:"Definite, indefinite, zero article – all rules"},
+  {id:2,  t:"Nouns – Countable & Uncountable",       d:"Quantifiers, irregular plurals, collective nouns (UK)"},
+  {id:3,  t:"Pronouns – All Types",                  d:"Personal, reflexive, relative, demonstrative, indefinite"},
+  {id:4,  t:"Present Simple & Continuous",           d:"Stative verbs, habits, temporary situations"},
+  {id:5,  t:"Past Simple & Continuous",              d:"Regular/irregular forms, interrupted actions"},
+  {id:6,  t:"Present Perfect (UK focus)",            d:"Just, already, yet, ever, never, since, for"},
+  {id:7,  t:"Present Perfect Continuous",            d:"Duration, recent activity, visible results"},
+  {id:8,  t:"Past Perfect & Past Perfect Continuous",d:"Sequencing events, reported speech"},
+  {id:9,  t:"Future Expressions",                    d:"Will, going to, present continuous, shall"},
+  {id:10, t:"Modal Verbs",                           d:"Can/could, may/might, must, should, would, ought to"},
+  {id:11, t:"Passive Voice",                         d:"All tenses, get-passive, impersonal passive"},
+  {id:12, t:"Reported Speech",                       d:"Backshifting, time/place changes, reporting questions"},
+  {id:13, t:"Conditional Sentences",                 d:"Zero, first, second, third, mixed + inverted"},
+  {id:14, t:"The Subjunctive (British)",             d:"Formulaic, mandative, were in hypotheticals"},
+  {id:15, t:"Relative Clauses",                      d:"Defining vs non-defining, who/which/that/whose"},
+  {id:16, t:"Noun Clauses & Indirect Questions",     d:"That-clauses, wh-clauses, if/whether"},
+  {id:17, t:"Adverbial Clauses",                     d:"Time, reason, result, purpose, condition, concession"},
+  {id:18, t:"Infinitives & Gerunds",                 d:"Verb patterns, meaning changes, bare infinitive"},
+  {id:19, t:"Adjectives",                            d:"Royal order, attributive/predicative, gradable"},
+  {id:20, t:"Comparatives & Superlatives",           d:"Rules, irregular forms, elder/eldest, further/farther"},
+  {id:21, t:"Adverbs",                               d:"Types, formation, placement, flat adverbs"},
+  {id:22, t:"Prepositions",                          d:"At/on/in for time and place, British collocations"},
+  {id:23, t:"Conjunctions",                          d:"FANBOYS, subordinating conjunctions, correlative pairs"},
+  {id:24, t:"Determiners & Quantifiers",             d:"Some/any, much/many, few/little, order of determiners"},
+  {id:25, t:"Negation",                              d:"Not, no, never, nobody – placement, double negatives"},
+  {id:26, t:"Questions & Inversion",                 d:"Question tags (British), indirect questions, inversion"},
+  {id:27, t:"Phrasal Verbs",                         d:"Separable, inseparable, three-word phrasal verbs"},
+  {id:28, t:"Collocations & Fixed Expressions",      d:"Make/do, strong/powerful, common British idioms"},
+  {id:29, t:"Word Order & Emphasis",                 d:"Cleft sentences, fronting, inversion for emphasis"},
+  {id:30, t:"Ellipsis & Substitution",               d:"Omitting words, so/not, do so, auxiliary substitution"},
+  {id:31, t:"Noun Phrases & Modification",           d:"Pre- and post-modification, participial phrases"},
+  {id:32, t:"Verb Valency & Patterns",               d:"Transitive, intransitive, ditransitive, linking"},
+  {id:33, t:"Aspect: Simple vs Continuous vs Perfect",d:"Choosing the right aspect for precise meaning"},
+  {id:34, t:"Spelling Rules – British English",      d:"-our/-ise/-re/-ll, doubling consonants, ie/ei"},
+  {id:35, t:"Punctuation – British Style",           d:"Apostrophes, commas, single quotes, colons"},
+  {id:36, t:"Formal vs Informal Register",           d:"Whom, preposition stranding, contractions"},
+  {id:37, t:"Wishes, Regrets & Hypotheticals",       d:"Wish, if only, would rather, it's time, had better"},
+  {id:38, t:"Compound & Complex Sentences",          d:"Coordination, subordination, punctuation rules"},
+  {id:39, t:"Common Errors in British English",      d:"Fewer/less, bring/take, lie/lay, who/whom, its/it's"},
+  {id:40, t:"Conditional Inversion & Advanced Syntax",d:"Had I known, were she to, should you need"}
+]
+};
+
+// ═══════════════════════════════════════════════
+//  LABELS
+// ═══════════════════════════════════════════════
+const LBL = {
+  nl:{
+    grammar:"Grammatica", practice:"Oefening", test:"Toets",
+    ph:"Zoek grammatica-onderwerpen...",
+    back:"Terug", startP:"Oefening starten", startT:"Toets starten",
+    loading:"Bezig met laden...", retry:"Opnieuw proberen",
+    errTitle:"Fout bij laden", errMsg:"Controleer je verbinding en probeer het opnieuw.",
+    q:"Vraag", of:"van", next:"Volgende →", submit:"Indienen ✓",
+    results:"Resultaten", review:"Overzicht van antwoorden",
+    tryAgain:"Opnieuw proberen", backTop:"Terug naar onderwerpen",
+    perfect:"Uitstekend! 🎉", great:"Goed gedaan! 👍",
+    ok:"Niet slecht 📚", keep:"Blijf oefenen! 💪",
+    expl:"Uitleg:", flagName:"NL"
+  },
+  fr:{
+    grammar:"Grammaire", practice:"Pratique", test:"Test",
+    ph:"Rechercher des sujets de grammaire...",
+    back:"Retour", startP:"Commencer la pratique", startT:"Commencer le test",
+    loading:"Chargement...", retry:"Réessayer",
+    errTitle:"Erreur de chargement", errMsg:"Vérifiez votre connexion et réessayez.",
+    q:"Question", of:"sur", next:"Suivante →", submit:"Soumettre ✓",
+    results:"Résultats", review:"Révision des réponses",
+    tryAgain:"Réessayer", backTop:"Retour aux sujets",
+    perfect:"Excellent ! 🎉", great:"Bien joué ! 👍",
+    ok:"Pas mal 📚", keep:"Continuez à pratiquer ! 💪",
+    expl:"Explication :", flagName:"FR"
+  },
+  en:{
+    grammar:"Grammar", practice:"Practice", test:"Test",
+    ph:"Search grammar topics...",
+    back:"Back", startP:"Start Practice", startT:"Start Test",
+    loading:"Loading...", retry:"Try Again",
+    errTitle:"Loading Error", errMsg:"Check your connection and try again.",
+    q:"Question", of:"of", next:"Next →", submit:"Submit ✓",
+    results:"Results", review:"Answer Review",
+    tryAgain:"Try Again", backTop:"Back to Topics",
+    perfect:"Perfect! 🎉", great:"Great job! 👍",
+    ok:"Not bad 📚", keep:"Keep practising! 💪",
+    expl:"Explanation:", flagName:"EN"
+  }
+};
+
+// ═══════════════════════════════════════════════
+//  PERSIST / HYDRATE
+// ═══════════════════════════════════════════════
+function persist() {
+  try {
+    localStorage.setItem('lx2', JSON.stringify({
+      lang: S.lang,
+      dark: S.dark,
+      tab:  S.tab
+    }));
+  } catch(e) {}
+}
+
+function hydrate() {
+  try {
+    const d = JSON.parse(localStorage.getItem('lx2') || '{}');
+    if (d.lang) S.lang = d.lang;
+    if (d.tab)  S.tab  = d.tab;
+    if (d.dark) {
+      S.dark = true;
+      document.body.setAttribute('data-theme', 'dark');
+      const ti = document.getElementById('themeIco');
+      if (ti) ti.textContent = '☀️';
+    }
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════
+//  ACCENT
+// ═══════════════════════════════════════════════
+function applyAccent(l) {
+  const map = { nl:'--nl-c,--nl-bg,--nl-bo', fr:'--fr-c,--fr-bg,--fr-bo', en:'--en-c,--en-bg,--en-bo' };
+  const [a, ab, abo] = map[l].split(',');
+  const cs = getComputedStyle(document.documentElement);
+  const r  = document.documentElement;
+  r.style.setProperty('--accent', cs.getPropertyValue(a).trim());
+  r.style.setProperty('--acbg',   cs.getPropertyValue(ab).trim());
+  r.style.setProperty('--acbo',   cs.getPropertyValue(abo).trim());
+}
+
+// ═══════════════════════════════════════════════
+//  LANGUAGE SELECT
+// ═══════════════════════════════════════════════
+function selectLang(l) {
+  S.lang = l;
+  S.tab  = 'grammar';
+  S.mode = 'grammar';
+  persist();
+  bootApp();
+}
+
+function bootApp() {
+  const l  = S.lang;
+  const lb = LBL[l];
+  const flags = { nl:'🇳🇱', fr:'🇫🇷', en:'🇬🇧' };
+  applyAccent(l);
+  document.getElementById('langFlag').textContent = flags[l];
+  document.getElementById('langName').textContent = lb.flagName;
+  document.getElementById('lbl-grammar').textContent  = lb.grammar;
+  document.getElementById('lbl-practice').textContent = lb.practice;
+  document.getElementById('lbl-test').textContent     = lb.test;
+  document.getElementById('searchInp').placeholder    = lb.ph;
+  document.getElementById('langSelect').style.display = 'none';
+  document.getElementById('app').style.display        = 'block';
+  showTab(S.tab || 'grammar');
+}
+
+function goHome() {
+  document.getElementById('langSelect').style.display = '';
+  document.getElementById('app').style.display        = 'none';
+}
+
+function toggleTheme() {
+  S.dark = !S.dark;
+  persist();
+  document.body.setAttribute('data-theme', S.dark ? 'dark' : '');
+  document.getElementById('themeIco').textContent = S.dark ? '☀️' : '🌙';
+  applyAccent(S.lang);
+}
+
+// ═══════════════════════════════════════════════
+//  TABS
+// ═══════════════════════════════════════════════
+function switchTab(t) {
+  S.tab = t;
+  persist();
+  showTab(t);
+}
+
+function showTab(t) {
+  ['grammar','practice','test'].forEach(x => {
+    document.getElementById('sec-'+x).style.display = (x === t) ? '' : 'none';
+    document.getElementById('tab-'+x).classList.toggle('active', x === t);
+  });
+  document.getElementById('sec-detail').style.display = 'none';
+  if (t === 'grammar')  renderGrid('grammarGrid',  'topicG');
+  if (t === 'practice') renderGrid('practiceGrid', 'topicP');
+  if (t === 'test')     renderGrid('testGrid',     'topicT');
+}
+
+// ═══════════════════════════════════════════════
+//  GRIDS
+// ═══════════════════════════════════════════════
+function renderGrid(gid, fn) {
+  const el = document.getElementById(gid);
+  if (!el) return;
+  el.innerHTML = TOPICS[S.lang].map((tp, i) =>
+    `<div class="tc" onclick="${fn}(${tp.id})" style="animation-delay:${i*0.022}s">
+      <div class="tc-num">${tp.id}</div>
+      <div class="tc-title">${tp.t}</div>
+      <div class="tc-desc">${tp.d}</div>
+    </div>`
+  ).join('');
+}
+
+function filterTopics() {
+  const q = document.getElementById('searchInp').value.toLowerCase();
+  document.querySelectorAll('#grammarGrid .tc').forEach(c => {
+    c.style.display = c.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  DETAIL PANE
+// ═══════════════════════════════════════════════
+function openDetailPane() {
+  ['sec-grammar','sec-practice','sec-test'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+  document.getElementById('backLbl').textContent        = LBL[S.lang].back;
+  document.getElementById('sec-detail').style.display  = '';
+}
+
+function backFromDetail() {
+  document.getElementById('sec-detail').style.display = 'none';
+  document.getElementById('sec-'+S.mode).style.display = '';
+  document.getElementById('tab-'+S.mode).classList.add('active');
+}
+
+function ldHTML(msg) {
+  return `<div class="cbox" id="qwrap"><div class="ldwrap"><div class="spin"></div><span>${msg}</span></div></div>`;
+}
+
+function errHTML(id, mode, lb) {
+  const fn = mode==='grammar' ? `topicG(${id})` : mode==='practice' ? `topicP(${id})` : `topicT(${id})`;
+  return `<div class="err-box">
+    <h3>⚠️ ${lb.errTitle}</h3>
+    <p>${lb.errMsg}</p>
+    <button class="btn btn-p" onclick="${fn}">${lb.retry}</button>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════
+//  TOPIC HANDLERS
+// ═══════════════════════════════════════════════
+function topicG(id) { S.mode='grammar';  openGrammar(id); }
+function topicP(id) { S.mode='practice'; openPractice(id); }
+function topicT(id) { S.mode='test';     openTest(id); }
+
+// ═══════════════════════════════════════════════
+//  GRAMMAR EXPLANATION
+// ═══════════════════════════════════════════════
+async function openGrammar(id) {
+  S.topicId = id;
+  const tp = TOPICS[S.lang].find(t => t.id === id);
+  const lb = LBL[S.lang];
+  openDetailPane();
+  document.getElementById('detailPane').innerHTML = `
+    <div class="det-hdr">
+      <h1>${tp.t}</h1>
+      <p class="det-desc">${tp.d}</p>
+      <div class="tact">
+        <button class="btn btn-s" onclick="topicP(${id})">${lb.startP}</button>
+        <button class="btn btn-s" onclick="topicT(${id})">${lb.startT}</button>
+      </div>
+    </div>
+    ${ldHTML(lb.loading)}`;
+  const box = document.getElementById('qwrap');
+  try {
+    box.innerHTML = await fetchGrammar(S.lang, id, tp.t, tp.d);
+  } catch(e) {
+    console.error(e);
+    box.outerHTML = errHTML(id, 'grammar', lb);
+  }
+}
+
+async function fetchGrammar(lang, id, title, desc) {
+  const k = `g:${lang}:${id}`;
+  if (S.cache[k]) return S.cache[k];
+  const L = { nl:'Dutch', fr:'French', en:'British English' }[lang];
+  const lng = {
+    nl: 'Schrijf ALLES volledig in het Nederlands. Geen enkel woord Engels.',
+    fr: "Écris TOUT entièrement en français. Pas un seul mot anglais.",
+    en: 'Write everything in clear English.'
+  }[lang];
+  const prompt = `You are a master ${L} grammar teacher writing a comprehensive lesson.
+${lng}
+
+TOPIC: "${title}"
+DESCRIPTION: "${desc}"
+
+Write a COMPLETE, DETAILED HTML grammar lesson. Return ONLY raw HTML — NO markdown, NO backticks, NO preamble text.
+
+Use EXACTLY these HTML elements:
+- <h2> for the main lesson title
+- <h3> for each section heading
+- <p> for paragraphs (write 2-4 sentences per paragraph, minimum 4 paragraphs total)
+- <ul><li> for rule lists (minimum 8 bullet points)
+- <strong> for key grammar terms
+- <em> for important emphasis (rendered in accent color)
+- <table><thead><tr><th>...<tbody><tr><td> for at least ONE grammar table
+- <div class="ex-box"><span class="orig">SENTENCE IN ${L.toUpperCase()}</span><span class="trl">English translation</span></div> for EACH example (minimum 8 examples)
+- <div class="tip-box">TIP TEXT</div> for memory tips (minimum 3)
+
+REQUIRED SECTIONS (use <h3> for each):
+1. Overview — 3-4 sentences introducing the topic
+2. Main Rules — detailed list with ALL rules, sub-rules, and exceptions (minimum 8 items)
+3. Conjugation / Paradigm Table — at least one table showing the grammar pattern
+4. Examples in Context — 8+ example sentences with translations using ex-box divs
+5. Common Mistakes — list of 5+ mistakes learners make with corrections
+6. Quick Tips — 3-4 tip-box divs with practical memory strategies
+
+Be thorough and accurate. This is the main learning resource.`;
+  const html = await callAI(prompt);
+  S.cache[k] = html;
+  return html;
+}
+
+// ═══════════════════════════════════════════════
+//  PRACTICE (20 Qs, immediate feedback)
+// ═══════════════════════════════════════════════
+async function openPractice(id) {
+  S.topicId = id;
+  const tp = TOPICS[S.lang].find(t => t.id === id);
+  const lb = LBL[S.lang];
+  openDetailPane();
+  document.getElementById('detailPane').innerHTML = `
+    <div class="det-hdr">
+      <h1>${tp.t}</h1>
+      <p class="det-desc">${lb.practice} — 20 ${lb.q}s</p>
+    </div>
+    ${ldHTML(lb.loading)}`;
+  try {
+    S.Qs = await fetchQuestions(S.lang, id, tp.t, 20, 'practice');
+    S.qi = 0;
+    S.ans = [];
+    renderPQ();
+  } catch(e) {
+    console.error(e);
+    document.getElementById('qwrap').outerHTML = errHTML(id, 'practice', lb);
+  }
+}
+
+function renderPQ() {
+  const lb  = LBL[S.lang];
+  const q   = S.Qs[S.qi];
+  const pct = Math.round(S.qi / S.Qs.length * 100);
+  document.getElementById('qwrap').innerHTML = `
+    <div class="qhdr">
+      <div class="pbar-wrap"><div class="pbar-fill" style="width:${pct}%"></div></div>
+      <div class="qmeta"><span>${lb.q} ${S.qi+1} ${lb.of} ${S.Qs.length}</span><span>${pct}%</span></div>
+    </div>
+    <div class="qcard">
+      <div class="qtext">${q.question}</div>
+      <div class="opts">
+        ${q.options.map((o,i) =>
+          `<button class="obtn" id="ob${i}" onclick="pickP(${i})">
+            <span class="oltr">${LTRS[i]}</span><span>${o}</span>
+          </button>`
+        ).join('')}
+      </div>
+      <div id="expbl"></div>
+    </div>
+    <div class="qnav">
+      <div></div>
+      <button class="btn btn-p" id="nxtbtn" style="display:none" onclick="nextPQ()">
+        ${S.qi < S.Qs.length-1 ? lb.next : '✓ '+lb.backTop}
+      </button>
+    </div>`;
+}
+
+function pickP(sel) {
+  const lb = LBL[S.lang];
+  const q  = S.Qs[S.qi];
+  document.querySelectorAll('.obtn').forEach((b, i) => {
+    b.disabled = true;
+    if (i === q.correct) b.classList.add('correct');
+    else if (i === sel && sel !== q.correct) b.classList.add('incorrect');
+  });
+  document.getElementById('expbl').innerHTML =
+    `<div class="expbox"><strong>${lb.expl}</strong> ${q.explanation}</div>`;
+  document.getElementById('nxtbtn').style.display = 'inline-flex';
+  S.ans[S.qi] = sel;
+}
+
+function nextPQ() {
+  if (S.qi < S.Qs.length - 1) { S.qi++; renderPQ(); }
+  else backFromDetail();
+}
+
+// ═══════════════════════════════════════════════
+//  TEST (20 Qs, submit at end)
+// ═══════════════════════════════════════════════
+async function openTest(id) {
+  S.topicId = id;
+  const tp = TOPICS[S.lang].find(t => t.id === id);
+  const lb = LBL[S.lang];
+  openDetailPane();
+  document.getElementById('detailPane').innerHTML = `
+    <div class="det-hdr">
+      <h1>${tp.t}</h1>
+      <p class="det-desc">${lb.test} — 20 ${lb.q}s</p>
+    </div>
+    ${ldHTML(lb.loading)}`;
+  try {
+    S.Qs  = await fetchQuestions(S.lang, id, tp.t, 20, 'test');
+    S.qi  = 0;
+    S.ans = new Array(20).fill(null);
+    renderTQ(0);
+  } catch(e) {
+    console.error(e);
+    document.getElementById('qwrap').outerHTML = errHTML(id, 'test', lb);
+  }
+}
+
+function renderTQ(idx) {
+  const lb     = LBL[S.lang];
+  const q      = S.Qs[idx];
+  const pct    = Math.round(idx / S.Qs.length * 100);
+  const isLast = idx === S.Qs.length - 1;
+  const sel    = S.ans[idx];
+  document.getElementById('qwrap').innerHTML = `
+    <div class="qhdr">
+      <div class="pbar-wrap"><div class="pbar-fill" style="width:${pct}%"></div></div>
+      <div class="qmeta"><span>${lb.q} ${idx+1} ${lb.of} ${S.Qs.length}</span><span>${pct}%</span></div>
+    </div>
+    <div class="qcard">
+      <div class="qtext">${q.question}</div>
+      <div class="opts">
+        ${q.options.map((o,i) =>
+          `<button class="obtn ${sel===i?'sel-test':''}" onclick="pickT(${idx},${i})">
+            <span class="oltr">${LTRS[i]}</span><span>${o}</span>
+          </button>`
+        ).join('')}
+      </div>
+    </div>
+    <div class="qnav">
+      ${idx > 0
+        ? `<button class="btn btn-o" onclick="renderTQ(${idx-1})">← </button>`
+        : '<div></div>'}
+      ${!isLast
+        ? `<button class="btn btn-p" onclick="renderTQ(${idx+1})">${lb.next}</button>`
+        : `<button class="btn btn-p" onclick="submitTest()">${lb.submit}</button>`}
+    </div>`;
+}
+
+function pickT(qi, opt) { S.ans[qi] = opt; renderTQ(qi); }
+
+function submitTest() {
+  const lb = LBL[S.lang];
+  let correct = 0;
+  S.Qs.forEach((q, i) => { if (S.ans[i] === q.correct) correct++; });
+  const total = S.Qs.length;
+  const pct   = Math.round(correct / total * 100);
+  const msg   = pct===100 ? lb.perfect : pct>=75 ? lb.great : pct>=45 ? lb.ok : lb.keep;
+  const clrOk = 'var(--accent)';
+  const clrNo = '#ef4444';
+
+  document.getElementById('qwrap').innerHTML = `
+    <div class="res-card">
+      <div class="res-lbl">${lb.results}</div>
+      <div class="res-score">${correct}/${total}</div>
+      <div class="res-msg">${msg}</div>
+      <div style="margin:0 0 1.5rem">
+        <div class="pbar-wrap" style="height:9px">
+          <div class="pbar-fill" id="rbar" style="width:0%"></div>
+        </div>
+        <div style="text-align:center;margin-top:.35rem;color:var(--text3);font-weight:700;font-size:.88rem">${pct}%</div>
+      </div>
+      <div class="res-acts">
+        <button class="btn btn-p" onclick="topicT(${S.topicId})">${lb.tryAgain}</button>
+        <button class="btn btn-s" onclick="backFromDetail()">${lb.backTop}</button>
+      </div>
+    </div>
+    <div class="rev-sect">
+      <h3>${lb.review}</h3>
+      ${S.Qs.map((q,i) => {
+        const ok  = S.ans[i] === q.correct;
+        const clr = ok ? clrOk : clrNo;
+        return `<div class="rev-item" style="border-left-color:${clr}">
+          <div class="rev-q">${i+1}. ${q.question}</div>
+          <div class="rev-a" style="color:${clr}">${ok?'✓':'✗'} ${LTRS[q.correct]}. ${q.options[q.correct]}</div>
+          <div class="rev-e">${q.explanation}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+
+  setTimeout(() => {
+    const rb = document.getElementById('rbar');
+    if (rb) rb.style.width = pct + '%';
+  }, 120);
+}
+
+// ═══════════════════════════════════════════════
+//  API
+// ═══════════════════════════════════════════════
+async function callAI(prompt) {
+  const resp = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 4000,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  if (!resp.ok) throw new Error('HTTP ' + resp.status);
+  const data = await resp.json();
+  const text = data.content && data.content[0] && data.content[0].text;
+  if (!text) throw new Error('Empty response');
+  return text;
+}
+async function fetchQuestions(lang, id, title, count, mode) {
+  const k = `q:${mode}:${lang}:${id}`;
+  if (S.cache[k]) return S.cache[k];
+  const L = { nl:'Dutch', fr:'French', en:'British English' }[lang];
+  const lng = {
+    nl: 'Schrijf ALLE vragen, antwoorden en uitleg volledig in het Nederlands.',
+    fr: "Écris TOUTES les questions, réponses et explications entièrement en français.",
+    en: 'Write all questions, answers and explanations in English.'
+  }[lang];
+  const prompt = `You are an expert ${L} grammar examiner. ${lng}
+
+Generate exactly ${count} multiple-choice questions testing: "${title}"
+
+Requirements:
+- Each question has exactly 4 options (A, B, C, D)
+- Exactly ONE option is correct
+- Vary difficulty: easy → medium → hard
+- Mix question types: sentence completion, error identification, translation, conceptual
+- Each explanation is 1-2 sentences explaining WHY the correct answer is right
+- Do NOT repeat the same question structure
+
+Return ONLY valid JSON with no markdown, no backticks, no extra text:
+{"questions":[{"question":"...","options":["text","text","text","text"],"correct":0,"explanation":"..."}]}
+
+"correct" is the 0-based index (0, 1, 2, or 3) of the correct option.`;
+
+  const raw = await callAI(prompt);
+  let clean = raw.trim()
+    .replace(/^```json\s*/, '').replace(/^```\s*/, '').replace(/\s*```$/, '');
+  const start = clean.indexOf('{');
+  if (start > 0) clean = clean.slice(start);
+  // find matching closing brace
+  let depth = 0, end = -1;
+  for (let i = 0; i < clean.length; i++) {
+    if (clean[i] === '{') depth++;
+    else if (clean[i] === '}') { depth--; if (depth === 0) { end = i; break; } }
+  }
+  if (end !== -1) clean = clean.slice(0, end + 1);
+  const data = JSON.parse(clean);
+  if (!data.questions || !Array.isArray(data.questions)) throw new Error('Bad JSON shape');
+  S.cache[k] = data.questions;
+  return data.questions;
+}
+
+// ═══════════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════════
+(function boot() {
+  hydrate();
+
+  // Expose all functions needed by inline onclick handlers
+  window.topicG = topicG; window.topicP = topicP; window.topicT = topicT;
+  window.pickP  = pickP;  window.nextPQ  = nextPQ;
+  window.pickT  = pickT;  window.renderTQ = renderTQ;
+  window.submitTest     = submitTest;
+  window.backFromDetail = backFromDetail;
+  window.filterTopics   = filterTopics;
+  window.switchTab      = switchTab;
+  window.toggleTheme    = toggleTheme;
+  window.goHome         = goHome;
+  window.selectLang     = selectLang;
+
+  // If language already chosen, skip language selection screen
+  if (S.lang && ['nl','fr','en'].includes(S.lang)) {
+    bootApp();
+  }
+})();
+</script>
+</body>
+</html>
